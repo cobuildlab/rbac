@@ -1,6 +1,3 @@
-import { rules } from './rules';
-import { CheckType } from './rbac-models';
-import { PermissionsNames } from './rbac-contants';
 
 /**
  * @description - Get message for the duple.
