@@ -9,3 +9,6 @@ export type RulesType<R extends string, P extends string> = {
       }
   };
 };
+
+
+export type FunctionCheckType<R, P> = (role: R, permission: P, data?: any) => void

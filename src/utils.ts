@@ -1,3 +1,5 @@
+import { RulesType, FunctionCheckType } from './types';
+
 
 /**
  * @description - Get message for the duple.
@@ -28,25 +30,45 @@ const getMessage = (
  * @param data - Used for dynamic Validtor in rules.
  * @returns {Array<boolean, string>} - Dupla with the validation response.
  */
-export const check: CheckType = (role, permissionName, data) => {
-  const currentRole = role ? rules.permissions[role] : null;
 
-  if (!currentRole) {
-    console.error('Check error: the role could not be found within the rules');
-    return [false, getMessage(permissionName)];
+export const checkGenerator = <R extends string, P extends string>(rules: RulesType<R, P>): FunctionCheckType<R, P> => {
+  return (role: R, permissionName: P, data: any): [boolean, string] => {
+    const currentRole = role ? rules[role] : null;
+  
+    if (!currentRole) {
+      console.error('Check error: the role could not be found within the rules');
+      return [false, getMessage(permissionName)];
+    }
+  
+    if (!permissionName) {
+      console.error('Check error: Permission name no defined');
+      return [false, getMessage(permissionName)];
+    }
+  
+    const permission = currentRole[permissionName]?.can;
+    if (permission && typeof permission === 'boolean') {
+      return [permission, getMessage(permissionName)];
+    } else if (permission && typeof permission === 'function') {
+      return permission(data);
+    }
+  
+    return [false, 'Not Permission found in rules'];
+  };
+}
+
+enum test {
+  hola = 'hola'
+}
+
+const testRules: RulesType<test, test> = {
+  [test.hola]:{
+    [test.hola]:{
+      can: true,
+      message: 'any'
+    }
   }
+}
 
-  if (!permissionName) {
-    console.error('Check error: Permission name no defined');
-    return [false, getMessage(permissionName)];
-  }
+const check = checkGenerator<test, test>(testRules);
 
-  const permission = currentRole[permissionName];
-  if (permission && typeof permission === 'boolean') {
-    return [permission, getMessage(permissionName)];
-  } else if (permission && typeof permission === 'function') {
-    return permission(data);
-  }
-
-  return [false, 'Not Permission found in rules'];
-};
+check(test.hola, test.hola, {});
