@@ -1,6 +1,6 @@
 {
-  "name": "@cobuildlab/buyer-board-shared",
-  "version": "0.4.0",
+  "name": "@cobuildlab/rbac",
+  "version": "0.1.0",
   "description": "",
   "main": "lib/index.js",
   "types": "./lib/index.d.ts",
@@ -21,10 +21,7 @@
     "url": "https://github.com/cobuildlab/buyer-board-shared/issues"
   },
   "homepage": "https://github.com/cobuildlab/buyer-board-shared#readme",
-  "dependencies": {
-    "@cobuildlab/validation-utils": "0.0.5",
-    "yup": "^0.32.9"
-  },
+  "dependencies": {},
   "husky": {
     "hooks": {
       "pre-commit": "npx lint-staged",
