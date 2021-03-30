@@ -1,10 +1,17 @@
 import { RulesType, FunctionCheckType } from './types';
 
+/**
+ * @description - Generate a check function,
+ * this is used to avoid passing the rules every time the check function is used.
+ * @param rules - Rules for the check functions.
+ * @returns {FunctionCheckType} - Return a check function with the rules already configured.
+ */
 export const checkGenerator = <R extends string, P extends string>(
-  rules: RulesType<R, P>, // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  rules: RulesType<R, P>,
 ): FunctionCheckType<R, P> => (
     role: R,
     permissionName: P,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any,
   ): [boolean, string] => {
     const currentRole = role ? rules[role] : null;
