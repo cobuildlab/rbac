@@ -1,6 +1,6 @@
-export type RulesType<R extends string, P extends string> = {
-  [key in R]: {
-    [key in P]: {
+export type RulesType<Role extends string, RuleName extends string> = {
+  [key in Role]: {
+    [key in RuleName]: {
       can?: boolean;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       validator?: (data: any) => [boolean, string];
@@ -9,9 +9,9 @@ export type RulesType<R extends string, P extends string> = {
   };
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type FunctionCheckType<R, P> = (
-  role: R,
-  permission: P,
+export type FunctionCheckType<Role, RuleName> = (
+  role: Role,
+  permission: RuleName,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: any,
-) => void;
+) => [boolean, string];

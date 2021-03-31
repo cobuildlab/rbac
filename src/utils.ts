@@ -6,11 +6,11 @@ import { RulesType, FunctionCheckType } from './types';
  * @param rules - Rules for the check functions.
  * @returns {FunctionCheckType} - Return a check function with the rules already configured.
  */
-export const checkGenerator = <R extends string, P extends string>(
-  rules: RulesType<R, P>,
-): FunctionCheckType<R, P> => (
-    role: R,
-    permissionName: P,
+export const checkGenerator = <Role extends string, RuleName extends string>(
+  rules: RulesType<Role, RuleName>,
+): FunctionCheckType<Role, RuleName> => (
+    role: Role,
+    permissionName: RuleName,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any,
   ): [boolean, string] => {
