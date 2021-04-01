@@ -22,11 +22,11 @@ export const checkGenerator = <Role extends string, RuleName extends string>(
     }
 
     const permission = currentRole[permissionName];
-    if (permission.can && typeof permission.can === 'boolean') {
+    if (typeof permission?.can === 'boolean') {
       return [permission.can, permission?.message || ''];
     }
 
-    if (permission.validator && typeof permission.validator === 'function') {
+    if (typeof permission?.validator === 'function') {
       return permission.validator(data);
     }
 

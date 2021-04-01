@@ -16,17 +16,21 @@ test('Test', () => {
     [roles.admin]: {
       [rules.dashboard]: {
         can: true,
-        message: 'any',
+        message: 'message',
       },
     },
     [roles.manager]: {
       [rules.dashboard]: {
         can: false,
+        message: 'message',
       },
     },
   };
 
   const check = checkGenerator(testRules);
-  expect(check(roles.admin, rules.dashboard, {})[0]).toBeTruthy();
-  expect(check(roles.manager, rules.dashboard, {})[0]).toBeFalsy();
+  expect(check(roles.admin, rules.dashboard)).toStrictEqual([true, 'message']);
+  expect(check(roles.manager, rules.dashboard)).toStrictEqual([
+    false,
+    'message',
+  ]);
 });
