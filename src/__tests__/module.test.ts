@@ -1,6 +1,6 @@
 import { test, expect } from '@jest/globals';
 import { checkGenerator } from '../utils';
-import { RulesType } from '../types';
+import { RulesType, ValidatorFunctionType } from '../types';
 
 test('test static rules', () => {
   enum roles {
@@ -52,7 +52,7 @@ test('test dynamic rules', () => {
     [roles.admin]: {
       [rules.dashboard]: {
         message: 'message',
-        validator: (data: Record<'id', string>) => [
+        validator: (data: Record<'id', unknown>) => [
           data.id === 'test-id',
           data.id === 'test-id' ? 'Success message' : 'Error message',
         ],
