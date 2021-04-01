@@ -15,3 +15,5 @@ export type FunctionCheckType<Role, RuleName> = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: any,
 ) => [boolean, string];
+
+export type ValidatorFunctionType<D> = (data: D) => [boolean, string];
