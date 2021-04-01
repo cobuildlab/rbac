@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cobuildlab/buyer-board-shared.git"
+    "url": "git+https://github.com/cobuildlab/rbac.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/cobuildlab/buyer-board-shared/issues"
+    "url": "https://github.com/cobuildlab/rbac/issues"
   },
-  "homepage": "https://github.com/cobuildlab/buyer-board-shared#readme",
+  "homepage": "https://github.com/cobuildlab/rbacd#readme",
   "dependencies": {},
   "husky": {
     "hooks": {
