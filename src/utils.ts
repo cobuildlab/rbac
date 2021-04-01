@@ -32,22 +32,3 @@ export const checkGenerator = <Role extends string, RuleName extends string>(
 
     return [false, 'Not Permission found in rules'];
   };
-
-/*
-  enum test {
-    hola = 'hola'
-  }
-
-  const testRules: RulesType<test, test> = {
-    [test.hola]:{
-      [test.hola]:{
-        can: true,
-        message: 'any'
-      }
-    }
-  }
-
-  const check = checkGenerator(testRules);
-
-  check(test.hola, test.hola, {});
-*/

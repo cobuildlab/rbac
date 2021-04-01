@@ -2,7 +2,7 @@ import { test, expect } from '@jest/globals';
 import { checkGenerator } from '../utils';
 import { RulesType } from '../types';
 
-test('Test', () => {
+test('test static rules', () => {
   enum roles {
     admin = 'admin',
     manager = 'manager',
@@ -33,4 +33,39 @@ test('Test', () => {
     false,
     'message',
   ]);
+});
+
+test('test dynamic rules', () => {
+  const data = {
+    id: 'test-id',
+  };
+
+  enum roles {
+    admin = 'admin',
+  }
+
+  enum rules {
+    dashboard = 'dashboard',
+  }
+
+  const testRules: RulesType<roles, rules> = {
+    [roles.admin]: {
+      [rules.dashboard]: {
+        message: 'message',
+        validator: (data: Record<'id', string>) => [
+          data.id === 'test-id',
+          data.id === 'test-id' ? 'Success message' : 'Error message',
+        ],
+      },
+    },
+  };
+
+  const check = checkGenerator(testRules);
+  expect(check(roles.admin, rules.dashboard, data)).toStrictEqual([
+    true,
+    'Success message',
+  ]);
+  expect(
+    check(roles.admin, rules.dashboard, { id: 'error-id' }),
+  ).toStrictEqual([false, 'Error message']);
 });
