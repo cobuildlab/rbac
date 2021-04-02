@@ -33,7 +33,7 @@ $ npm i @cobuildlab/rbac
 
 [`Example`](#Examples)
 
-
+### Function check use
 ```typescript
   enum roles {
     admin = 'admin',
@@ -70,4 +70,28 @@ $ npm i @cobuildlab/rbac
 
   // dynamic permission
   check(roles.admin, rules.dashboard, { id: 'test-id' }))
+```
+
+### Integration with React
+
+```typescript
+const RoleAuthorization: FC<RoleAuthorizationProps> = ({
+  render,
+  error,
+  permission,
+}) => {
+  const [canRender, message] = check(user.role.admin, permission, data);
+  if (canRender) {
+    return render(message);
+  }
+  return error ? error(message) : null;
+};
+```
+
+```typescript
+<RoleAuthorization
+  permission={PermissionNames.AGENT_ADMIN_USER_DETAILS}
+  render={() => <UserDetialsView />}
+  error={() => <div>You dont have permission</div>}
+/>
 ```
