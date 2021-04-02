@@ -70,7 +70,7 @@ $ npm i @cobuildlab/rbac
   check(roles.admin, permissions.dashboard)
 
   // dynamic permission
-  check(roles.admin, rules.dashboard, { id: 'test-id' }))
+  check(roles.manager, rules.dashboard, { id: 'test-id' }))
 ```
 
 ### Integration with React
