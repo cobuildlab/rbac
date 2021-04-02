@@ -1,6 +1,6 @@
 import { test, expect } from '@jest/globals';
 import { checkGenerator } from '../utils';
-import { RulesType, ValidatorFunctionType } from '../types';
+import { RulesType } from '../types';
 
 test('test static rules', () => {
   enum roles {
