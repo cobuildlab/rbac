@@ -8,10 +8,13 @@ export class Rules {
   private currentPermission = '';
   private currentRole = '';
 
-  private checkCurrent(): void {
+  private checkCurrentRole(): void {
     if (!this.rules[this.current]) {
       throw new Error('Role not defined');
     }
+  }
+
+  private checkCurrentPermission(): void {
     if (!this.rules[this.current][this.currentPermission]) {
       throw new Error('Permssion not defined');
     }
@@ -25,8 +28,12 @@ export class Rules {
     return Boolean(this.rules[role]?.[permission]);
   }
 
-  setDefaultRole(name: string) {
-    this.currentRole = name;
+  setDefaultRole(name: string): void {
+    if (this.isRoleInRules(name)) {
+      this.currentRole = name;
+    } else {
+      throw new Error('Role not fund in rules');
+    }
   }
 
   role(name: string): this {
@@ -38,6 +45,7 @@ export class Rules {
   }
 
   permission(name: string): this {
+    this.checkCurrentRole();
     if (!this.isPermissionInRole(this.current, name)) {
       Object.assign(this.rules[this.current], { [name]: {} });
     }
@@ -45,24 +53,27 @@ export class Rules {
     return this;
   }
 
-  can(status: boolean): this {
-    this.checkCurrent();
+  can(status: boolean, message?: string): this {
+    this.checkCurrentPermission();
     Object.assign(this.rules[this.current][this.currentPermission], {
       can: status,
     });
+    if (message) {
+      this.message(message);
+    }
     return this;
   }
 
   dynamic(cb: ValidatorFunctionType): this {
-    this.checkCurrent();
+    this.checkCurrentPermission();
     Object.assign(this.rules[this.current][this.currentPermission], {
       dynamic: cb,
     });
     return this;
   }
 
-  message(message: string): void {
-    this.checkCurrent();
+  private message(message: string): void {
+    this.checkCurrentPermission();
     Object.assign(this.rules[this.current][this.currentPermission], {
       message,
     });
@@ -86,7 +97,7 @@ export class Rules {
 
     if (!this.isPermissionInRole(currentRole, permission)) {
       console.error(`Not permission ${currentRole} found in rules`);
-      return [false];
+      return [false, `Not permission ${currentRole} found in rules`];
     }
 
     const _permission = this.rules[currentRole][permission];
@@ -105,24 +116,3 @@ export class Rules {
     return [false, 'Not Permission found in rules'];
   }
 }
-
-const test = new Rules();
-
-test.role('new').permission('dashboard').can(true);
-test
-  .role('new')
-  .permission('dashboard')
-  .dynamic((data: { id: string }) => {
-    return [data.id === 'jamon'];
-  });
-
-test.role('agent').permission('dashboard').can(false).message('some message');
-
-console.log('test 1', test.check('new', 'dashboard', { id: 'test' }));
-console.log('test 2', test.check('agent', 'dashboard', { id: 'test' }));
-
-test.setDefaultRole('new');
-
-console.log('default role');
-console.log('test 1', test.check(null, 'dashboard', { id: 'test' }));
-console.log('test 2', test.check(null, 'dashboard', { id: 'casa' }));

@@ -1,71 +1,73 @@
 import { test, expect } from '@jest/globals';
-import { checkGenerator } from '../utils';
-import { RulesType } from '../types';
+import { Rules } from '../rules';
 
-test('test static rules', () => {
-  enum roles {
-    admin = 'admin',
-    manager = 'manager',
-  }
-
-  enum rules {
-    dashboard = 'dashboard',
-  }
-
-  const testRules: RulesType<roles, rules> = {
-    [roles.admin]: {
-      [rules.dashboard]: {
-        can: true,
-        message: 'message',
-      },
-    },
-    [roles.manager]: {
-      [rules.dashboard]: {
-        can: false,
-        message: 'message',
-      },
-    },
-  };
-
-  const check = checkGenerator(testRules);
-  expect(check(roles.admin, rules.dashboard)).toStrictEqual([true, 'message']);
-  expect(check(roles.manager, rules.dashboard)).toStrictEqual([
+test('Test static rules', () => {
+  const staticRules = new Rules();
+  staticRules.role('admin').permission('dashboard').can(true, 'Access granted');
+  staticRules
+    .role('manager')
+    .permission('dashboard')
+    .can(false, 'Access denied');
+  expect(staticRules.check('admin', 'dashboard')).toStrictEqual([
+    true,
+    'Access granted',
+  ]);
+  expect(staticRules.check('manager', 'dashboard')).toStrictEqual([
     false,
-    'message',
+    'Access denied',
   ]);
 });
 
-test('test dynamic rules', () => {
-  const data = {
-    id: 'test-id',
-  };
-
-  enum roles {
-    admin = 'admin',
-  }
-
-  enum rules {
-    dashboard = 'dashboard',
-  }
-
-  const testRules: RulesType<roles, rules> = {
-    [roles.admin]: {
-      [rules.dashboard]: {
-        message: 'message',
-        validator: (data: Record<'id', unknown>) => [
-          data.id === 'test-id',
-          data.id === 'test-id' ? 'Success message' : 'Error message',
-        ],
-      },
-    },
-  };
-
-  const check = checkGenerator(testRules);
-  expect(check(roles.admin, rules.dashboard, data)).toStrictEqual([
+test('Test dynamic rules', () => {
+  const dynamic = new Rules();
+  const testData = { id: 'test' };
+  dynamic
+    .role('admin')
+    .permission('dashboard')
+    .dynamic((data: any) => {
+      const result = data.id === testData.id;
+      const message = result ? 'Access granted' : 'Access denied';
+      return [result, message];
+    });
+  expect(dynamic.check('admin', 'dashboard', testData)).toStrictEqual([
     true,
-    'Success message',
+    'Access granted',
   ]);
   expect(
-    check(roles.admin, rules.dashboard, { id: 'error-id' }),
-  ).toStrictEqual([false, 'Error message']);
+    dynamic.check('admin', 'dashboard', { id: 'error-id' }),
+  ).toStrictEqual([false, 'Access denied']);
+});
+
+test('Test default rules', () => {
+  const rule = new Rules();
+  rule.role('admin').permission('dashboard').can(false);
+  rule.setDefaultRole('admin');
+  expect(rule.check(null, 'dashboard')).toStrictEqual([false]);
+  expect(() => {
+    rule.setDefaultRole('error-role');
+  }).toThrow('Role not fund in rules');
+});
+
+test('Unexpected use of check', () => {
+  const rule = new Rules();
+  rule.role('admin').permission('dashboard').can(false);
+  expect(rule.check(null, 'dashboard')).toStrictEqual([
+    false,
+    'Not default role or default-role found',
+  ]);
+  expect(rule.check('error-role', 'dashboard')).toStrictEqual([
+    false,
+    'Not permission error-role found in rules',
+  ]);
+});
+
+test('Unexpected permission assignment', () => {
+  const rule = new Rules();
+
+  expect(() => {
+    rule.permission('dashboard');
+  }).toThrow('Role not defined');
+  expect(() => {
+    rule.role('admin').can(true);
+  }).toThrow('Permssion not defined');
 });
