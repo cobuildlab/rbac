@@ -1,21 +1,14 @@
-export type RulesType<Role extends string, RuleName extends string> = {
-  [key in Role]: {
-    [key in RuleName]: {
+export type RulesType = {
+  [key: string]: {
+    [key: string]: {
       can?: boolean;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      validator?: ValidatorFunctionType;
+      dynamic?: ValidatorFunctionType;
       message?: string;
     };
   };
 };
 
-export type FunctionCheckType<Role, RuleName> = (
-  role: Role,
-  permission: RuleName,
+export type ValidatorFunctionType = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data?: any,
-) => [boolean, string];
-
-export type ValidatorFunctionType<D = Record<string, unknown>> = (
-  data: D,
-) => [boolean, string];
+  data: any,
+) => [boolean, string?];
