@@ -33,66 +33,71 @@ $ npm i @cobuildlab/rbac
 ```
 
 [`Example`](#Examples)
+### Basic use
 
-### Function check use
 ```typescript
-  enum roles {
-    admin = 'admin',
-    manager = 'manager',
-  }
+  const RBACproject = new RBAC();
 
-  enum permissions {
-    dashboard = 'dashboard',
-  }
+  // defined the rules
+  RBACproject.createRule('admin', 'dashboard', true, 'Access granted');
+  RBACproject.createRule('manager', 'dashboard', false, 'Access denied');
 
-  const Rules: RulesType<roles, permissions> = {
-    [roles.admin]: {
-      [permissions.dashboard]: {
-        can: true,
-        message: 'message',
-      },
-    },
-    [roles.manager]: {
-      [permissions.dashboard]: {
-        message: 'message',
-        validator: (data: Record<'id', unknown>) => [
-          data.id === 'test-id',
-          data.id === 'test-id' ? 'Success message' : 'Error message',
-        ],
-      },
-    },
-  };
+ 
+  RBACproject.check('admin', 'dashboard') // [true, 'Access granted']
+```
 
-  // added checkGenerator in shared 
-  const check = checkGenerator(testRules);
+### Declaring dynamic rules
 
-  // static permission
-  check(roles.admin, permissions.dashboard)
+```typescript
+  const RBACdynamic = new RBAC();
 
-  // dynamic permission
-  check(roles.manager, permissions.dashboard, { id: 'test-id' }))
+  // defined dynamic rules
+  RBACdynamic.createRule('admin', 'dashboard', (data: any) => {
+    const result = data.id === testData.id;
+    const message = result ? 'Access granted' : 'Access denied';
+    return [result, message];
+  });
+
+  const testData = { id: 'test' }; // fake data
+  RBACdynamic.check('admin', 'dashboard', testData)
+```
+
+
+### Set default role
+
+```typescript
+  const defaultRole = new RBAC();
+
+  defaultRole.createRule('admin', 'dashboard', false, 'Access granted');
+  defaultRole.setDefaultRole('admin');
+
+  rule.check(null, 'dashboard') // [false, 'Access granted']
 ```
 
 ### Integration with React
 
-```typescript
-const RoleAuthorization: FC<RoleAuthorizationProps> = ({
+```js
+const RBAC = new RBAC();
+RBAC.createRule('admin', 'AGENT_ADMIN_USER_DETAILS', false, 'Access granted');
+
+const RoleAuthorization = ({
   render,
   error,
   permission,
 }) => {
-  const [canRender, message] = check(user.role.admin, permission, data);
+  const [canRender, message] = RBAC.check('admin', permission, data);
   if (canRender) {
     return render(message);
   }
   return error ? error(message) : null;
 };
-```
 
-```typescript
-<RoleAuthorization
-  permission={PermissionNames.AGENT_ADMIN_USER_DETAILS}
-  render={() => <UserDetialsView />}
-  error={() => <div>You dont have permission</div>}
-/>
+const MyComponent = () => (
+  <RoleAuthorization
+    permission={'AGENT_ADMIN_USER_DETAILS'}
+    render={() => <UserDetialsView />}
+    error={() => <div>You dont have permission</div>}
+  />
+);
+
 ```
