@@ -2,13 +2,18 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { RulesType, ValidatorFunctionType } from './types';
 
-export class RBAC {
+export class RBAC<R extends Record<string,string>,P extends Record<string,string>> {
+
+
   private rules: RulesType = {};
   private currentRole = '';
 
+  constructor(roles?:R,permissions?:P){
+
+  }
   createRule(
-    roleName: string,
-    permissionName: string,
+    roleName: keyof R,
+    permissionName: keyof P,
     test: boolean | ValidatorFunctionType,
     message?: string,
   ): void {
