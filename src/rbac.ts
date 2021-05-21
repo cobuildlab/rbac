@@ -2,11 +2,11 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { RulesType, ValidatorFunctionType } from './types';
 
-export class RBAC<R extends Record<string,string>,P extends Record<string,string>> {
+export class RBAC<R extends Record<string,string>,P extends Record<string,string>,D extends Partial<Record<keyof P,unknown>> = {}> {
 
 
-  private rules: RulesType = {};
-  private currentRole = '';
+  private rules: Partial<RulesType<R,P>> = {};
+  private currentRole:keyof R = '';
 
   constructor(roles?:R,permissions?:P){
 
@@ -14,7 +14,7 @@ export class RBAC<R extends Record<string,string>,P extends Record<string,string
   createRule(
     roleName: keyof R,
     permissionName: keyof P,
-    test: boolean | ValidatorFunctionType,
+    test: boolean | ValidatorFunctionType<D[keyof P]>,
     message?: string,
   ): void {
     Object.assign(this.rules, {
@@ -43,7 +43,7 @@ export class RBAC<R extends Record<string,string>,P extends Record<string,string
    * @param permission - Permission to fined in the role.
    * @returns {boolean} - Return true is find the permission.
    */
-  private isPermissionInRole(role: string, permission: string): boolean {
+  private isPermissionInRole(role: keyof R, permission: keyof P): boolean {
     return Boolean(this.rules[role]?.[permission]);
   }
 
@@ -67,11 +67,11 @@ export class RBAC<R extends Record<string,string>,P extends Record<string,string
    * @returns {Array<boolean, string>} - Result of test.
    */
   check(
-    role: string | null,
-    permission: string,
-    data?: any,
+    role: keyof R ,
+    permission: keyof P,
+    data?: D[keyof P],
   ): [boolean, string?] {
-    let currentRole = '';
+    let currentRole:keyof R = '';
 
     if (this.currentRole?.length && !role) {
       currentRole = this.currentRole;
