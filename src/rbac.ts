@@ -6,10 +6,10 @@ export class RBAC<R extends Record<string,string>,P extends Record<string,string
 
 
   private rules: Partial<RulesType<R,P>> = {};
-  private currentRole:keyof R = '';
+  private currentRole:keyof R;
 
-  constructor(roles?:R,permissions?:P){
-
+  constructor(defaultRole:keyof R,roles?:R,permissions?:P){
+    this.currentRole = defaultRole
   }
   createRule(
     roleName: keyof R,
