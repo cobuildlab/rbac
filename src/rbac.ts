@@ -8,8 +8,8 @@ export class RBAC<R extends Record<string,string>,P extends Record<string,string
   private rules: Partial<RulesType<R,P>> = {};
   private currentRole:keyof R;
 
-  constructor(defaultRole:keyof R,roles?:R,permissions?:P){
-    this.currentRole = defaultRole
+  constructor(roles?:R,permissions?:P){
+    this.currentRole = ''
   }
   createRule(
     roleName: keyof R,
@@ -33,7 +33,7 @@ export class RBAC<R extends Record<string,string>,P extends Record<string,string
    * @param role - Role to fined in rules.
    * @returns {boolean} - Return true is find the role.
    */
-  private isRoleInRules(role: string): boolean {
+  private isRoleInRules(role: keyof R): boolean {
     return Boolean(this.rules[role]);
   }
 
@@ -51,7 +51,7 @@ export class RBAC<R extends Record<string,string>,P extends Record<string,string
    * @description - Configure a default role to avoid passing it every time in the check function.
    * @param name - Role name.
    */
-  setDefaultRole(name: string): void {
+  setDefaultRole(name: keyof R): void {
     if (this.isRoleInRules(name)) {
       this.currentRole = name;
     } else {
@@ -67,27 +67,25 @@ export class RBAC<R extends Record<string,string>,P extends Record<string,string
    * @returns {Array<boolean, string>} - Result of test.
    */
   check(
-    role: keyof R ,
+    role: keyof R  | null,
     permission: keyof P,
     data?: D[keyof P],
   ): [boolean, string?] {
-    let currentRole:keyof R = '';
+    const currentRole:keyof R = this.currentRole?.toString().length && !role ? this.currentRole : role ?? ''
 
-    if (this.currentRole?.length && !role) {
-      currentRole = this.currentRole;
-    } else if (role) {
-      currentRole = role;
-    } else {
+    if (!(this.currentRole?.toString().length && !role)) {
       console.error('Not default role or default-role found');
       return [false, 'Not default role or default-role found'];
-    }
+    } 
 
     if (!this.isPermissionInRole(currentRole, permission)) {
       console.error(`Not permission ${currentRole} found in rules`);
       return [false, `Not permission ${currentRole} found in rules`];
     }
 
-    const _permission = this.rules[currentRole][permission];
+    const rules = this.rules[currentRole] 
+
+    const _permission = rules ? rules[permission] : {};
 
     if (typeof _permission?.can !== 'undefined') {
       const result: [boolean, string?] = [_permission.can];

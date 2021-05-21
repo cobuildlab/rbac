@@ -1,6 +1,6 @@
 export type RulesType<R,P> = {
-  [key in keyof R]: {
-    [key in keyof P]: {
+  [role in keyof R]: {
+    [permission in keyof P]: {
       can?: boolean;
       dynamic?: ValidatorFunctionType;
       message?: string;
