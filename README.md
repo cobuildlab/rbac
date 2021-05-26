@@ -74,6 +74,24 @@ $ npm i @cobuildlab/rbac
   rule.check(null, 'dashboard') // [false, 'Access granted']
 ```
 
+### Strict Type
+
+```typescript
+  enum Roles {
+    ADMIN = 'ADMIN',
+    MANAGER = 'MANAGER',
+  }
+
+  enum Permissions {
+    DASHBOARD = 'DASHBOARD',
+  }
+
+  const defaultRole = new RBAC(Roles, Permissions);
+  defaultRole.createRule(Roles.ADMIN, Permissions.DASHBOARD, false, 'Access granted');
+
+  rule.check(Roles.ADMIN, 'dashboard') // [false, 'Access granted']
+```
+
 ### Integration with React
 
 ```js
