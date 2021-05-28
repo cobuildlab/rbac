@@ -163,3 +163,33 @@ const MyComponent = () => (
   />
 );
 ```
+
+### Integration with Node.js
+
+```ts
+const api = require('api-request');
+
+enum Roles {
+  ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
+}
+
+enum Permissions {
+  CAN_READ_USERS = 'CAN_READ_USERS',
+}
+
+const RBAC = new RBAC<Roles, Permissions>(Roles.MANGER);
+
+RBAC.createRule(
+  Roles.ADMIN,
+  Permissions.CAN_READ_USERS,
+  true,
+  'Access granted',
+);
+
+if (RBAC.check(Roles.ADMIN, Permissions.CAN_READ_USERS)) {
+  api.getUser().then((users) => {
+    //Do some stuff with uses.
+  });
+}
+```
