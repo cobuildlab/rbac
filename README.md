@@ -1,9 +1,10 @@
 # Role-Based Access Control
 
-  Role-based access control (RBAC) refers to the idea of assigning permissions to users based on their role within an organization. It offers a simple, manageable approach to access management that is less prone to error than assigning permissions to users individually.
+Role-based access control (RBAC) refers to the idea of assigning permissions to users based on their role within an organization. It offers a simple, manageable approach to access management that is less prone to error than assigning permissions to users individually.
 
 ### RBAC architecture conventions discussion
-  https://github.com/cobuildlab/conventions/issues/24
+
+https://github.com/cobuildlab/conventions/issues/24
 
 <br/>
 
@@ -23,7 +24,6 @@
 
 - RBAC Model
 
-
 ## Installation
 
 1. Run on your terminal the following command:
@@ -33,76 +33,121 @@ $ npm i @cobuildlab/rbac
 ```
 
 [`Example`](#Examples)
-### Basic use
+
+### Basic use (Strictly types by defualt)
 
 ```typescript
-  const RBACproject = new RBAC();
+// It is strictly typed so it need enums declared before initialization
+enum Roles {
+  ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
+}
 
-  // defined the rules
-  RBACproject.createRule('admin', 'dashboard', true, 'Access granted');
-  RBACproject.createRule('manager', 'dashboard', false, 'Access denied');
+enum Permissions {
+  DASHBOARD = 'DASHBOARD',
+}
 
- 
-  RBACproject.check('admin', 'dashboard') // [true, 'Access granted']
+// It needs the Roles and Permissions passed as generics, and a default role.
+const RBACproject = new RBAC<Roles, Permissions>(Roles.ADMIN);
+
+// defined the rules
+RBACproject.createRule(
+  Roles.ADMIN,
+  Permissions.DASHBOARD,
+  true,
+  'Access granted',
+);
+RBACproject.createRule(
+  Roles.MANAGER,
+  Permissions.DASHBOARD,
+  false,
+  'Access denied',
+);
+
+RBACproject.check(Roles.ADMIN, Permissions.DASHBOARD); // [true, 'Access granted']
 ```
 
 ### Declaring dynamic rules
 
 ```typescript
-  const RBACdynamic = new RBAC();
+// It is strictly typed so it need enums declared before initialization
+enum Roles {
+  ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
+}
 
-  // defined dynamic rules
-  RBACdynamic.createRule('admin', 'dashboard', (data: any) => {
-    const result = data.id === testData.id;
-    const message = result ? 'Access granted' : 'Access denied';
-    return [result, message];
-  });
+enum Permissions {
+  DASHBOARD = 'DASHBOARD',
+}
 
-  const testData = { id: 'test' }; // fake data
-  RBACdynamic.check('admin', 'dashboard', testData)
+// It accept a type for the dinamic data of the permission
+const RBACdynamic = new RBAC<
+  Roles,
+  Permissions,
+  { DASHBOARD: { shouldEdit: boolean } }
+>(Roles.ADMIN);
+
+// Here data will be types as `{ shouldEdit: boolean }`
+RBACdynamic.createRule(Roles.ADMIN, Permissions.DASHBOARD, (data) => {
+  const result = data.shouldEdit;
+
+  const message = result ? 'Access granted' : 'Access denied';
+  return [result, message];
+});
+
+const testData = { shouldEdit: true }; // fake data
+RBACdynamic.check(Roles.ADMIN, Permissions.DASHBOARD, testData);
 ```
-
 
 ### Set default role
 
 ```typescript
-  const defaultRole = new RBAC();
+enum Roles {
+  ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
+}
 
-  defaultRole.createRule('admin', 'dashboard', false, 'Access granted');
-  defaultRole.setDefaultRole('admin');
+enum Permissions {
+  DASHBOARD = 'DASHBOARD',
+}
 
-  rule.check(null, 'dashboard') // [false, 'Access granted']
-```
+const defaultRole = new RBAC<Roles, Permissions>(Roles.MANGER);
 
-### Strict Type
+defaultRole.createRule(
+  Roles.ADMIN,
+  Permissions.DASHBOARD,
+  false,
+  'Access granted',
+);
 
-```typescript
-  enum Roles {
-    ADMIN = 'ADMIN',
-    MANAGER = 'MANAGER',
-  }
+// This method allows to set a defualt role, after initialization
+defaultRole.setDefaultRole(Roles.ADMIN);
 
-  enum Permissions {
-    DASHBOARD = 'DASHBOARD',
-  }
-
-  const defaultRole = new RBAC(Roles, Permissions);
-  defaultRole.createRule(Roles.ADMIN, Permissions.DASHBOARD, false, 'Access granted');
-
-  rule.check(Roles.ADMIN, 'dashboard') // [false, 'Access granted']
+defaultRole.check(null, Permissions.DASHBOARD); // [false, 'Access granted']
 ```
 
 ### Integration with React
 
-```js
-const RBAC = new RBAC();
-RBAC.createRule('admin', 'AGENT_ADMIN_USER_DETAILS', false, 'Access granted');
+```tsx
+enum Roles {
+  ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
+}
 
-const RoleAuthorization = ({
-  render,
-  error,
-  permission,
-}) => {
+enum Permissions {
+  AGENT_ADMIN_USER_DETAILS = 'AGENT_ADMIN_USER_DETAILS',
+}
+
+const RBAC = new RBAC<Roles, Permissions>(Roles.MANGER);
+
+RBAC.createRule(
+  Roles.ADMIN,
+  Permissions.AGENT_ADMIN_USER_DETAILS,
+  false,
+  'Access granted',
+);
+
+const RoleAuthorization = ({ render, error, permission }) => {
   const [canRender, message] = RBAC.check('admin', permission, data);
   if (canRender) {
     return render(message);
@@ -117,5 +162,34 @@ const MyComponent = () => (
     error={() => <div>You dont have permission</div>}
   />
 );
+```
 
+### Integration with Node.js
+
+```ts
+const api = require('api-request');
+
+enum Roles {
+  ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
+}
+
+enum Permissions {
+  CAN_READ_USERS = 'CAN_READ_USERS',
+}
+
+const RBAC = new RBAC<Roles, Permissions>(Roles.MANGER);
+
+RBAC.createRule(
+  Roles.ADMIN,
+  Permissions.CAN_READ_USERS,
+  true,
+  'Access granted',
+);
+
+if (RBAC.check(Roles.ADMIN, Permissions.CAN_READ_USERS)) {
+  api.getUser().then((users) => {
+    //Do some stuff with uses.
+  });
+}
 ```

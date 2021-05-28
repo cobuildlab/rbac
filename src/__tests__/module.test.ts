@@ -10,7 +10,8 @@ test('Test static rules', () => {
     DASHBOARD = 'DASHBOARD',
   }
 
-  const staticRules = new RBAC(Roles, Permissions);
+  const staticRules = new RBAC<Roles, Permissions>(Roles.ADMIN);
+
   staticRules.createRule(
     Roles.ADMIN,
     Permissions.DASHBOARD,
@@ -40,11 +41,9 @@ test('Test dynamic rules', () => {
     DASHBOARD = 'DASHBOARD',
   }
 
-  const dynamic = new RBAC<
-    typeof Roles,
-    typeof Permissions,
-    { DASHBOARD: { id: string } }
-  >();
+  const dynamic = new RBAC<Roles, Permissions, { DASHBOARD: { id: string } }>(
+    Roles.ADMIN,
+  );
   const testData = { id: 'test' };
   dynamic.createRule(
     Roles.ADMIN,
@@ -71,7 +70,7 @@ test('Test default rules', () => {
   enum Permissions {
     DASHBOARD = 'DASHBOARD',
   }
-  const rule = new RBAC<typeof Roles, typeof Permissions>();
+  const rule = new RBAC<Roles, Permissions>(Roles.ADMIN);
   rule.createRule(Roles.ADMIN, Permissions.DASHBOARD, false, 'Access granted');
   rule.setDefaultRole(Roles.ADMIN);
   expect(rule.check(null, Permissions.DASHBOARD)).toStrictEqual([
@@ -81,17 +80,4 @@ test('Test default rules', () => {
   expect(() => {
     rule.setDefaultRole(Roles.MANAGER);
   }).toThrow('Role not fund in rules');
-});
-
-test('Unexpected use of check', () => {
-  const rule = new RBAC();
-  rule.createRule('admin', 'dashboard', false, 'Access granted');
-  expect(rule.check(null, 'dashboard')).toStrictEqual([
-    false,
-    'Not default role or default-role found',
-  ]);
-  expect(rule.check('error-role', 'dashboard')).toStrictEqual([
-    false,
-    'Not permission error-role found in rules',
-  ]);
 });

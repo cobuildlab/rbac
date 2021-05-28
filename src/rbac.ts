@@ -4,15 +4,15 @@
 import { RulesType, ValidatorFunctionType } from './types';
 
 export class RBAC<
-  R extends Record<string, string>,
-  P extends Record<string, string>,
-  D extends Partial<Record<keyof P, unknown>> = {}
+  R extends string,
+  P extends string,
+  D extends Partial<Record<P, unknown>> = {}
 > {
   private rules: Partial<RulesType<R, P>> = {};
-  private currentRole: keyof R;
+  private currentRole: R;
 
-  constructor(roles?: R, permissions?: P) {
-    this.currentRole = '';
+  constructor(defualtRole: R) {
+    this.currentRole = defualtRole;
   }
 
   /**
@@ -23,9 +23,9 @@ export class RBAC<
    * @param message - Error message.
    */
   createRule(
-    roleName: keyof R,
-    permissionName: keyof P,
-    test: boolean | ValidatorFunctionType<D[keyof P]>,
+    roleName: R,
+    permissionName: P,
+    test: boolean | ValidatorFunctionType<D[P]>,
     message?: string,
   ): void {
     Object.assign(this.rules, {
@@ -44,7 +44,7 @@ export class RBAC<
    * @param role - Role to fined in rules.
    * @returns {boolean} - Return true is find the role.
    */
-  private isRoleInRules(role: keyof R): boolean {
+  private isRoleInRules(role: R): boolean {
     return Boolean(this.rules[role]);
   }
 
@@ -54,7 +54,7 @@ export class RBAC<
    * @param permission - Permission to fined in the role.
    * @returns {boolean} - Return true is find the permission.
    */
-  private isPermissionInRole(role: keyof R, permission: keyof P): boolean {
+  private isPermissionInRole(role: R, permission: P): boolean {
     return Boolean(this.rules[role]?.[permission]);
   }
 
@@ -62,7 +62,7 @@ export class RBAC<
    * @description - Configure a default role to avoid passing it every time in the check function.
    * @param name - Role name.
    */
-  setDefaultRole(name: keyof R): void {
+  setDefaultRole(name: R): void {
     if (this.isRoleInRules(name)) {
       this.currentRole = name;
     } else {
@@ -77,15 +77,8 @@ export class RBAC<
    * @param data - Data for dynamic permission.
    * @returns {Array<boolean, string>} - Result of test.
    */
-  check(
-    role: keyof R | null,
-    permission: keyof P,
-    data?: D[keyof P],
-  ): [boolean, string?] {
-    const currentRole: keyof R =
-      this.currentRole?.toString()?.length && !role
-        ? this.currentRole
-        : role ?? '';
+  check(role: R | null, permission: P, data?: D[P]): [boolean, string?] {
+    const currentRole: R = role ?? this.currentRole;
 
     if (!this.currentRole?.toString()?.length && !role) {
       console.error('Not default role or default-role found');
