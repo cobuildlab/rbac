@@ -108,20 +108,3 @@ export class RBAC<
     return [false, 'Not Permission found in rules'];
   }
 }
-
-enum Roles {
-  ADMIN = 'ADMIN',
-  MANAGER = 'MANAGER',
-  AGENT = 'AGENT',
-}
-
-enum Permissions {
-  DASHBOARD = 'DASHBOARD',
-  SETTINGS = 'SETTINGS',
-}
-
-const rules = new RBAC<Roles, Permissions>(Roles.ADMIN);
-
-rules.createRule(Roles.ADMIN, Permissions.DASHBOARD, true);
-
-// rules.createRule('ADMIN', Permissions.DASHBOARD, true);
