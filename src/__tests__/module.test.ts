@@ -8,6 +8,7 @@ test('Test static rules', () => {
   }
   enum Permissions {
     DASHBOARD = 'DASHBOARD',
+    SETTINGS = 'SETTINGS',
   }
 
   const staticRules = new RBAC<Roles, Permissions>(Roles.ADMIN);
@@ -19,12 +20,22 @@ test('Test static rules', () => {
     'Access granted',
   );
   staticRules.createRule(
+    Roles.ADMIN,
+    Permissions.SETTINGS,
+    true,
+    'Access granted',
+  );
+  staticRules.createRule(
     Roles.MANAGER,
     Permissions.DASHBOARD,
     false,
     'Access denied',
   );
   expect(staticRules.check(Roles.ADMIN, Permissions.DASHBOARD)).toStrictEqual([
+    true,
+    'Access granted',
+  ]);
+  expect(staticRules.check(Roles.ADMIN, Permissions.SETTINGS)).toStrictEqual([
     true,
     'Access granted',
   ]);
