@@ -28,15 +28,25 @@ export class RBAC<
     test: boolean | ValidatorFunctionType<D[P]>,
     message?: string,
   ): void {
-    Object.assign(this.rules, {
-      [roleName]: {
+    if (this.rules[roleName]) {
+      Object.assign(this.rules[roleName], {
         [permissionName]: {
           can: typeof test === 'boolean' ? test : undefined,
           dynamic: typeof test === 'function' ? test : undefined,
           message,
         },
-      },
-    });
+      });
+    } else {
+      Object.assign(this.rules, {
+        [roleName]: {
+          [permissionName]: {
+            can: typeof test === 'boolean' ? test : undefined,
+            dynamic: typeof test === 'function' ? test : undefined,
+            message,
+          },
+        },
+      });
+    }
   }
 
   /**
