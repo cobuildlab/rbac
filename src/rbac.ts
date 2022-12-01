@@ -117,4 +117,8 @@ export class RBAC<
     }
     return [false, 'Not Permission found in rules'];
   }
+
+  simpleCheck(role: R | null, permission: P, data?: D[P]): boolean {
+    return this.check(role, permission, data)[0];
+  }
 }

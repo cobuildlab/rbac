@@ -92,3 +92,29 @@ test('Test default rules', () => {
     rule.setDefaultRole(Roles.MANAGER);
   }).toThrow('Role not fund in rules');
 });
+
+test('Test simple Check', () => {
+  enum Roles {
+    ADMIN = 'ADMIN',
+    MANAGER = 'MANAGER',
+  }
+  enum Permissions {
+    DASHBOARD = 'DASHBOARD',
+    SETTINGS = 'SETTINGS',
+  }
+
+  const staticRules = new RBAC<Roles, Permissions>(Roles.ADMIN);
+
+  staticRules.createRule(Roles.ADMIN, Permissions.DASHBOARD, true);
+  staticRules.createRule(Roles.ADMIN, Permissions.SETTINGS, true);
+  staticRules.createRule(Roles.MANAGER, Permissions.DASHBOARD, false);
+  expect(
+    staticRules.simpleCheck(Roles.ADMIN, Permissions.DASHBOARD),
+  ).toStrictEqual(true);
+  expect(
+    staticRules.simpleCheck(Roles.ADMIN, Permissions.SETTINGS),
+  ).toStrictEqual(true);
+  expect(
+    staticRules.simpleCheck(Roles.MANAGER, Permissions.DASHBOARD),
+  ).toStrictEqual(false);
+});
